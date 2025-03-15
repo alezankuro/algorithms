@@ -4,30 +4,29 @@ function defaultComparator<T>(firstValue: T, secondValue: T) {
     return Number(firstValue) - Number(secondValue);
 }
 
-function merge<T>(
+export function merge<T>(
     arr: T[],
     comparator: Comparator<T>,
     l: number,
     q: number,
     r: number
 ) {
-    const left = arr.slice(l, q + 1);
-    const right = arr.slice(q + 1, r + 1);
+    const res = [];
+    let i = l;
+    let j = q + 1;
 
-    let i = 0;
-    let j = 0;
-    let k = l;
-
-    while (i < left.length && j < right.length) {
-        if (comparator(left[i], right[j]) <= 0) {
-            arr[k++] = left[i++];
+    while (i <= q && j <= r) {
+        if (comparator(arr[i], arr[j]) <= 0) {
+            res.push(arr[i++]);
         } else {
-            arr[k++] = right[j++];
+            res.push(arr[j++]);
         }
     }
 
-    while (i < left.length) arr[k++] = left[i++];
-    while (j < right.length) arr[k++] = right[j++];
+    while (i <= q) res.push(arr[i++]);
+    while (j <= r) res.push(arr[j++]);
+
+    res.forEach((value, index) => (arr[l + index] = value));
 }
 
 export function mergeSort<T>(
