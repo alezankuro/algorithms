@@ -1,4 +1,4 @@
-import { swap, type Comparator, defaultComparator } from '../common';
+import { swap, type Comparator, defaultComparator } from '../../common';
 
 function partition<T>(
     arr: T[],
