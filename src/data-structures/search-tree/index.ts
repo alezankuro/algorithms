@@ -1,25 +1,33 @@
-export type TreeTraverseCallback = (node: TreeNode) => void;
+import { defaultComparator, type Comparator } from 'src/common';
 
-export class TreeNode {
+export type TreeTraverseCallback<T> = (node: TreeNode<T>) => void;
+
+export class TreeNode<T = number> {
     constructor(
-        public value: number,
-        public left: TreeNode | null = null,
-        public right: TreeNode | null = null,
-        public parent: TreeNode | null = null,
+        public value: T,
+        public left: TreeNode<T> | null = null,
+        public right: TreeNode<T> | null = null,
+        public parent: TreeNode<T> | null = null,
     ) {}
 }
 
-export class SearchTree {
-    constructor(public root: TreeNode | null = null) {}
+export class SearchTree<T = number> {
+    constructor(
+        public root: TreeNode<T> | null = null,
+        private comparator: Comparator<T> = defaultComparator,
+    ) {}
 
-    public insert(node: TreeNode) {
+    public insert(node: TreeNode<T>) {
         let current = this.root;
-        let trailing: TreeNode | null = null;
+        let trailing: TreeNode<T> | null = null;
 
         while (current) {
             trailing = current;
 
-            if (current.left && node.value < current.value) {
+            if (
+                current.left &&
+                this.comparator(node.value, current.value) < 0
+            ) {
                 current = current.left;
             } else {
                 current = current.right;
@@ -28,7 +36,7 @@ export class SearchTree {
 
         if (!trailing) {
             this.root = node;
-        } else if (node.value < trailing.value) {
+        } else if (this.comparator(node.value, trailing.value) < 0) {
             trailing.left = node;
         } else {
             trailing.right = node;
@@ -40,8 +48,8 @@ export class SearchTree {
     }
 
     public traverseRecursive(
-        callback: TreeTraverseCallback,
-        node: TreeNode | null = this.root,
+        callback: TreeTraverseCallback<T>,
+        node: TreeNode<T> | null = this.root,
     ) {
         if (!node) return;
 
@@ -50,15 +58,16 @@ export class SearchTree {
         this.traverseRecursive(callback, node.right);
     }
 
-    public search(value: number, node = this.root): TreeNode | null {
-        if (!node || value === node.value) return node;
+    public search(value: T, node = this.root): TreeNode<T> | null {
+        if (!node || this.comparator(value, node.value) === 0) return node;
 
-        if (value < node.value) return this.search(value, node.left);
+        if (this.comparator(value, node.value) < 0)
+            return this.search(value, node.left);
 
         return this.search(value, node.right);
     }
 
-    public getMinimum(node = this.root): TreeNode | null {
+    public getMinimum(node = this.root): TreeNode<T> | null {
         let current = node;
 
         while (current?.left) current = current.left;
@@ -66,7 +75,7 @@ export class SearchTree {
         return current;
     }
 
-    public getMaximum(node = this.root): TreeNode | null {
+    public getMaximum(node = this.root): TreeNode<T> | null {
         let current = node;
 
         while (current?.right) current = current.right;
@@ -102,7 +111,7 @@ export class SearchTree {
         return trailing;
     }
 
-    private transplant(target: TreeNode, node: TreeNode | null) {
+    private transplant(target: TreeNode<T>, node: TreeNode<T> | null) {
         if (!target.parent) {
             this.root = node;
         } else if (target === target.parent.left) {
@@ -116,7 +125,7 @@ export class SearchTree {
         }
     }
 
-    public deleteNode(node: TreeNode) {
+    public deleteNode(node: TreeNode<T>) {
         if (!node.left) {
             this.transplant(node, node.right);
         } else if (!node.right) {

@@ -1,5 +1,6 @@
 import { describe, it, expect, mock } from 'bun:test';
 
+import { type Comparator } from 'src/common';
 import { SearchTree, TreeNode } from '.';
 
 describe('SearchTree', () => {
@@ -73,7 +74,8 @@ describe('SearchTree', () => {
 
             const expected = [3, 5, 7, 10, 15];
             const actual: number[] = [];
-            const callback = (node: TreeNode) => actual.push(node.value);
+            const callback = (node: TreeNode) =>
+                actual.push(node.value);
 
             tree.traverseRecursive(callback);
 
@@ -306,7 +308,9 @@ describe('SearchTree', () => {
         });
 
         it('should delete the root node when it is the only node in the tree', () => {
-            const tree = new SearchTree().insert(new TreeNode(10));
+            const tree = new SearchTree().insert(
+                new TreeNode(10),
+            );
 
             const nodeToDelete = tree.search(10)!;
             tree.deleteNode(nodeToDelete);
@@ -337,6 +341,63 @@ describe('SearchTree', () => {
             expect(tree.search(12)?.right?.value).toBe(13);
             expect(tree.search(11)?.parent?.value).toBe(12);
             expect(tree.search(13)?.parent?.value).toBe(12);
+        });
+    });
+
+    describe('custom comparator', () => {
+        it('should work with string values using a custom comparator', () => {
+            const stringComparator: Comparator<string> = (a, b) => {
+                if (a < b) return -1;
+                if (a > b) return 1;
+                return 0;
+            };
+
+            const tree = new SearchTree<string>(null, stringComparator);
+            tree.insert(new TreeNode<string>('banana'))
+                .insert(new TreeNode<string>('apple'))
+                .insert(new TreeNode<string>('cherry'));
+
+            expect(tree.root?.value).toBe('banana');
+            expect(tree.root?.left?.value).toBe('apple');
+            expect(tree.root?.right?.value).toBe('cherry');
+
+            expect(tree.search('apple')).not.toBeNull();
+            expect(tree.search('banana')).not.toBeNull();
+            expect(tree.search('cherry')).not.toBeNull();
+            expect(tree.search('orange')).toBeNull();
+        });
+
+        it('should work with custom object values using a custom comparator', () => {
+            interface Person {
+                id: number;
+                name: string;
+            }
+
+            const personComparator: Comparator<Person> = (a, b) => {
+                return a.id - b.id;
+            };
+
+            const person1 = { id: 10, name: 'Alice' };
+            const person2 = { id: 5, name: 'Bob' };
+            const person3 = { id: 15, name: 'Charlie' };
+
+            const tree = new SearchTree<Person>(null, personComparator);
+            tree.insert(new TreeNode<Person>(person1))
+                .insert(new TreeNode<Person>(person2))
+                .insert(new TreeNode<Person>(person3));
+
+            expect(tree.root?.value).toBe(person1);
+            expect(tree.root?.left?.value).toBe(person2);
+            expect(tree.root?.right?.value).toBe(person3);
+
+            expect(tree.search({ id: 5, name: 'Bob' })?.value.name).toBe('Bob');
+            expect(tree.search({ id: 10, name: 'Alice' })?.value.name).toBe(
+                'Alice',
+            );
+            expect(tree.search({ id: 15, name: 'Charlie' })?.value.name).toBe(
+                'Charlie',
+            );
+            expect(tree.search({ id: 20, name: 'Dave' })).toBeNull();
         });
     });
 });
