@@ -400,4 +400,55 @@ describe('SearchTree', () => {
             expect(tree.search({ id: 20, name: 'Dave' })).toBeNull();
         });
     });
+
+    describe('getNodes', () => {
+        it('should return empty array for empty tree', () => {
+            const tree = new SearchTree();
+            expect(tree.getNodes()).toEqual([]);
+        });
+
+        it('should return single node array for tree with one node', () => {
+            const node = new TreeNode(10);
+            const tree = new SearchTree(node);
+            expect(tree.getNodes()).toEqual([node]);
+        });
+
+        it('should return nodes in sorted order for multi-node tree', () => {
+            const tree = new SearchTree()
+                .insert(new TreeNode(10))
+                .insert(new TreeNode(5))
+                .insert(new TreeNode(15))
+                .insert(new TreeNode(3))
+                .insert(new TreeNode(7));
+
+            const expectedValues = [3, 5, 7, 10, 15];
+            const actualNodes = tree.getNodes();
+
+            expect(actualNodes.map(n => n.value)).toEqual(expectedValues);
+        });
+    });
+
+    describe('getValues', () => {
+        it('should return empty array for empty tree', () => {
+            const tree = new SearchTree();
+            expect(tree.getValues()).toEqual([]);
+        });
+
+        it('should return single value array for tree with one node', () => {
+            const node = new TreeNode(10);
+            const tree = new SearchTree(node);
+            expect(tree.getValues()).toEqual([10]);
+        });
+
+        it('should return values in sorted order', () => {
+            const tree = new SearchTree()
+                .insert(new TreeNode(10))
+                .insert(new TreeNode(5))
+                .insert(new TreeNode(15))
+                .insert(new TreeNode(3))
+                .insert(new TreeNode(7));
+
+            expect(tree.getValues()).toEqual([3, 5, 7, 10, 15]);
+        });
+    });
 });

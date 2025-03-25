@@ -58,6 +58,18 @@ export class SearchTree<T = number> {
         this.traverseRecursive(callback, node.right);
     }
 
+    public getNodes(): TreeNode<T>[] {
+        const nodes: TreeNode<T>[] = [];
+        this.traverseRecursive(node => nodes.push(node));
+        return nodes;
+    }
+
+    public getValues(): T[] {
+        const values: T[] = [];
+        this.traverseRecursive(node => values.push(node.value));
+        return values;
+    }
+
     public search(value: T, node = this.root): TreeNode<T> | null {
         if (!node || this.comparator(value, node.value) === 0) return node;
 
